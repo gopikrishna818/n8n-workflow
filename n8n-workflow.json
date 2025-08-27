@@ -1,0 +1,2331 @@
+{
+  "name": "Sendor AI",
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  return {\n    json: {\n      ...item.json,\n      startTime: Date.now()\n    }\n  };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1952,
+        -432
+      ],
+      "id": "157f4e1d-5915-4d51-b3e9-1fb48204cafb",
+      "name": "Start Timer"
+    },
+    {
+      "parameters": {
+        "useCustomSchema": true,
+        "operation": "getAll",
+        "tableId": "outreach_data",
+        "limit": 1,
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "PhoneNumber",
+              "condition": "eq",
+              "keyValue": "={{ $json.body.call.to_number }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -1936,
+        704
+      ],
+      "id": "76638dc6-f408-4473-93b7-df5e2290f004",
+      "name": "Get many rows",
+      "credentials": {
+        "supabaseApi": {
+          "id": "gk2rBjn0VRnz3ziw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.normalizedOutcome }}",
+                    "rightValue": "interested",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "61454a42-7831-4a4e-a909-08ac96fa3589"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Interested"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "5a00d62d-a8a3-4b4f-8e79-3b192d1b9ce1",
+                    "leftValue": "={{ $json.normalizedOutcome }}",
+                    "rightValue": "booked appointment",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Booked"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "b3313f57-8293-4f26-b6aa-9f2363bdde26",
+                    "leftValue": "={{ $json.normalizedOutcome }}",
+                    "rightValue": "rejected offer",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Rejected"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "95c407c7-ff63-428d-9344-c6c978e6c947",
+                    "leftValue": "={{ $json.normalizedOutcome }}",
+                    "rightValue": "unknown",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Unknown"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        592,
+        1024
+      ],
+      "id": "81d0010c-4f30-4d60-a4f5-efbb8bb29b8a",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "fromEmail": "tonystark57ts@gmail.com",
+        "toEmail": "={{ $json.user_email }}",
+        "subject": "\"Case Studies and More Info\"",
+        "html": "=<p>Hi,</p>\n<p>Thanks for your time on the call! Please find some case studies that might help:</p>\n<ul>\n  <li><a href=\"https://example.com/case-study-1\">Case Study 1</a></li>\n  <li><a href=\"https://example.com/case-study-2\">Case Study 2</a></li>\n</ul>\n<p>Best regards,<br>Your Company</p>\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1136,
+        640
+      ],
+      "id": "38165c53-9d84-4f2f-beb7-da73dca4a9cd",
+      "name": "Send email1",
+      "webhookId": "015cf318-289b-4f04-bf62-fb138cba3de7",
+      "credentials": {
+        "smtp": {
+          "id": "MmD0gwisO1k73vyS",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "call_logs",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "retell_call_id",
+              "condition": "eq",
+              "keyValue": "={{ $json.retell_call_id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "next_step",
+              "fieldValue": "\"Booked Appointment\""
+            },
+            {
+              "fieldId": "appointment_time",
+              "fieldValue": "={{ $node[\"Transform_Call_Data\"].json.appointment_time }}"
+            },
+            {
+              "fieldId": "email_sent",
+              "fieldValue": "false"
+            },
+            {
+              "fieldId": "from_email",
+              "fieldValue": "tonystark57ts@gmail.com"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1136,
+        864
+      ],
+      "id": "4353bccd-b1cc-4931-983d-05b64e3418e7",
+      "name": "Update a row1",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "gk2rBjn0VRnz3ziw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "call_logs",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "retell_call_id",
+              "condition": "eq",
+              "keyValue": "={{ $json.retell_call_id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "next_step",
+              "fieldValue": "\"No Action\""
+            },
+            {
+              "fieldId": "email_sent",
+              "fieldValue": "false"
+            },
+            {
+              "fieldId": "appointment_time",
+              "fieldValue": "={{ null }}"
+            },
+            {
+              "fieldId": "outcome",
+              "fieldValue": "={{ $json.normalizedOutcome }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1136,
+        1056
+      ],
+      "id": "f010ebbd-c4af-411d-8111-37fc705442ae",
+      "name": "Update a row2",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "gk2rBjn0VRnz3ziw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "call_logs",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "retell_call_id",
+              "condition": "eq",
+              "keyValue": "={{$json.retell_call_id}}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "next_step",
+              "fieldValue": "\"Manual Review\""
+            },
+            {
+              "fieldId": "email_sent",
+              "fieldValue": "false"
+            },
+            {
+              "fieldId": "flagged_for_review",
+              "fieldValue": "true"
+            },
+            {
+              "fieldId": "notes",
+              "fieldValue": "\"Outcome Unknown – needs manual review\""
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1152,
+        1264
+      ],
+      "id": "35464153-478c-42cc-88e7-95e66a41ddf1",
+      "name": "Update a row3",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "gk2rBjn0VRnz3ziw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "call_logs",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "retell_call_id",
+              "keyValue": "={{ $json[\"retell_call_id\"] }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        128,
+        160
+      ],
+      "id": "5fc4e463-53f4-44dc-a955-9bf81747d87e",
+      "name": "Get a row",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "gk2rBjn0VRnz3ziw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "call_logs",
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "retell_call_id",
+              "condition": "eq",
+              "keyValue": "={{ $json.retell_call_id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "attempts",
+              "fieldValue": "={{ $json.attempts }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1536,
+        0
+      ],
+      "id": "48d18861-a545-4d44-856e-de493026a472",
+      "name": "Update a row5",
+      "credentials": {
+        "supabaseApi": {
+          "id": "gk2rBjn0VRnz3ziw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const code7Data = $node[\"Merge Call + Prospect\"].json;\nreturn [\n  {\n    json: {\n      attempts: $node[\"Parse_Retell_Webhook\"].json.attempts,\n      call_id: $node[\"Parse_Retell_Webhook\"].json.retell_call_id,\n      from_number: \"+16292631068\",\n      to_number: code7Data.PhoneNumber\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        848,
+        0
+      ],
+      "id": "d69c0da5-3c1c-4514-80ac-8a9f0e383ddc",
+      "name": "Code8"
+    },
+    {
+      "parameters": {
+        "jsCode": "const retell = $json;                 // from HTTP Request (Retell response)\nconst codeData = $node[\"Parse_Retell_Webhook\"].json; // has incremented attempts + retell_call_id\n\nreturn [\n  {\n    json: {\n      ...retell,                      // keep Retell fields\n      attempts: codeData.attempts,    // force attempts from Supabase\n      retell_call_id: codeData.retell_call_id, // keep original ID for update\n      phoneNumber: codeData.phoneNumber,\n      prospect_id: codeData.prospect_id\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1312,
+        0
+      ],
+      "id": "bf822d8d-e046-4ea7-bc3f-cc020efd52ed",
+      "name": "Code9"
+    },
+    {
+      "parameters": {
+        "tableId": "email_logs",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "call_log_id",
+              "fieldValue": "={{ $node[\"Save Call Log\"].json.id }}"
+            },
+            {
+              "fieldId": "prospect_id",
+              "fieldValue": "={{ $node[\"Merge Call + Prospect\"].json.id }}"
+            },
+            {
+              "fieldId": "retell_call_id",
+              "fieldValue": "={{ $json.retell_call_id }}"
+            },
+            {
+              "fieldId": "from_email",
+              "fieldValue": "tonystark57ts@gmail.com"
+            },
+            {
+              "fieldId": "to_email",
+              "fieldValue": "={{ $json.user_email }}"
+            },
+            {
+              "fieldId": "subject",
+              "fieldValue": "\"Case Studies and More Info\""
+            },
+            {
+              "fieldId": "template_key",
+              "fieldValue": "\"case_studies\""
+            },
+            {
+              "fieldId": "sent_at",
+              "fieldValue": "={{ new Date().toISOString() }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1344,
+        640
+      ],
+      "id": "b16eb06b-e165-453b-bdd1-2413b9b5443a",
+      "name": "Create a row3",
+      "credentials": {
+        "supabaseApi": {
+          "id": "gk2rBjn0VRnz3ziw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "call_logs",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "retell_call_id",
+              "condition": "eq",
+              "keyValue": "={{$json.retell_call_id}}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "email_sent",
+              "fieldValue": "true"
+            },
+            {
+              "fieldId": "email_subject",
+              "fieldValue": "\"Case Studies and More Info\""
+            },
+            {
+              "fieldId": "email_sent_at",
+              "fieldValue": "={{ new Date().toISOString() }}"
+            },
+            {
+              "fieldId": "from_email",
+              "fieldValue": "tonystark57ts@gmail.com"
+            },
+            {
+              "fieldId": "to_email",
+              "fieldValue": "={{ $json.user_email }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1520,
+        640
+      ],
+      "id": "bae47815-34b3-4227-a13b-6afc6e879f5c",
+      "name": "Update a row",
+      "credentials": {
+        "supabaseApi": {
+          "id": "gk2rBjn0VRnz3ziw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "call_analysis_events",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "retell_call_id",
+              "fieldValue": "={{ $json.retell_call_id }}"
+            },
+            {
+              "fieldId": "analyzed_at",
+              "fieldValue": "={{ new Date().toISOString() }}"
+            },
+            {
+              "fieldId": "analyzer_version",
+              "fieldValue": "n8n-v1"
+            },
+            {
+              "fieldId": "outcome",
+              "fieldValue": "={{ $json.call_analysis?.custom_analysis_data?.Outcome ?? \"Unknown\" }}"
+            },
+            {
+              "fieldId": "extra",
+              "fieldValue": "={{ { transcriptChars: $json.transcript } }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        96,
+        624
+      ],
+      "id": "f8246bda-6ac1-4cff-ab9c-4fcab68e5b21",
+      "name": "Create a row4",
+      "credentials": {
+        "supabaseApi": {
+          "id": "gk2rBjn0VRnz3ziw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "81d4ba48-4fa7-43a2-953e-5165fa089968",
+              "leftValue": "={{ $json.metric_date }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2448,
+        1024
+      ],
+      "id": "676065a7-fd13-4eaa-a877-81c2d41323d2",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "daily_metrics",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "metric_date",
+              "keyValue": "={{$json.metric_date}}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2240,
+        1024
+      ],
+      "id": "586e1b45-192f-43f2-a9fa-33209874cdc6",
+      "name": "daily_metrics",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "gk2rBjn0VRnz3ziw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const today = new Date().toISOString().split('T')[0];\n\nconst isUnsuccessful =\n  [\"dial_no_answer\", \"dial_busy\", \"dial_failed\"].includes($json.disconnection_reason || \"\");\n\nconst pickedUp = !isUnsuccessful;\n\n// Prefer normalizedOutcome → outcome → next_step\nconst outcomeText = (\n  $json.normalizedOutcome ||\n  $json.outcome ||\n  $json.next_step ||\n  \"unknown\"\n).toString().trim().toLowerCase();\n\nconst inc = {\n  calls_sent: 1,\n  calls_picked_up: pickedUp ? 1 : 0,\n  rejected_offers: outcomeText === \"rejected offer\" ? 1 : 0,\n  booked_appointments: outcomeText.includes(\"booked appointment\") ? 1 : 0,\n  interested_mailed: (outcomeText === \"interested\" && ($json.email_sent === true)) ? 1 : 0,\n  emails_sent: ($json.email_sent === true) ? 1 : 0\n};\n\nreturn [{\n  json: {\n    metric_date: today,\n    ...inc,\n    from_email: $json.from_email || null,\n    template_key: $json.email_subject ? \"case_studies\" : null\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1968,
+        1024
+      ],
+      "id": "16e8eeb7-6e83-4843-8282-6bbe948d5cf9",
+      "name": "ComputeDailyIncrements"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "daily_metrics",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "metric_date",
+              "condition": "eq",
+              "keyValue": "={{ $node[\"ComputeDailyIncrements\"].json.metric_date }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "calls_sent",
+              "fieldValue": "={{ $node[\"ComputeDailyIncrements\"].json.calls_sent }}"
+            },
+            {
+              "fieldId": "calls_picked_up",
+              "fieldValue": "={{ $node[\"ComputeDailyIncrements\"].json.calls_picked_up }}"
+            },
+            {
+              "fieldId": "rejected_offers",
+              "fieldValue": "={{$node[\"ComputeDailyIncrements\"].json.rejected_offers }}"
+            },
+            {
+              "fieldId": "booked_appointments",
+              "fieldValue": "={{$node[\"ComputeDailyIncrements\"].json.booked_appointments }}"
+            },
+            {
+              "fieldId": "interested_mailed",
+              "fieldValue": "={{$node[\"ComputeDailyIncrements\"].json.interested_mailed }}"
+            },
+            {
+              "fieldId": "emails_sent",
+              "fieldValue": "= {{$node[\"ComputeDailyIncrements\"].json.emails_sent }}"
+            },
+            {
+              "fieldId": "last_updated",
+              "fieldValue": "= {{ new Date().toISOString() }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2656,
+        928
+      ],
+      "id": "fd637b7c-5e04-4c48-b671-d2f1d379d55c",
+      "name": "Update daily_metrics",
+      "credentials": {
+        "supabaseApi": {
+          "id": "gk2rBjn0VRnz3ziw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "daily_metrics",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "metric_date",
+              "fieldValue": "={{ $node[\"ComputeDailyIncrements\"].json.metric_date }}"
+            },
+            {
+              "fieldId": "calls_sent",
+              "fieldValue": "={{ $node[\"ComputeDailyIncrements\"].json.calls_sent }}"
+            },
+            {
+              "fieldId": "calls_picked_up",
+              "fieldValue": "={{ $node[\"ComputeDailyIncrements\"].json.calls_picked_up }}"
+            },
+            {
+              "fieldId": "rejected_offers",
+              "fieldValue": "={{ $node[\"ComputeDailyIncrements\"].json.rejected_offers }}"
+            },
+            {
+              "fieldId": "booked_appointments",
+              "fieldValue": "={{ $node[\"ComputeDailyIncrements\"].json.booked_appointments }}"
+            },
+            {
+              "fieldId": "interested_mailed",
+              "fieldValue": "={{ $node[\"ComputeDailyIncrements\"].json.interested_mailed }}"
+            },
+            {
+              "fieldId": "emails_sent",
+              "fieldValue": "={{ $node[\"ComputeDailyIncrements\"].json.emails_sent }}"
+            },
+            {
+              "fieldId": "last_updated",
+              "fieldValue": "={{ new Date().toISOString() }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2656,
+        1120
+      ],
+      "id": "ca0ea77e-cf9c-4206-a244-0d6361c53275",
+      "name": "Create daily_metrics",
+      "credentials": {
+        "supabaseApi": {
+          "id": "gk2rBjn0VRnz3ziw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "call_logs",
+        "returnAll": true,
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "retell_call_id",
+              "condition": "eq",
+              "keyValue": "={{ $json.retell_call_id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -1200,
+        304
+      ],
+      "id": "db173d35-8af9-479d-9d38-869485680611",
+      "name": "Get many rows2",
+      "alwaysOutputData": false,
+      "credentials": {
+        "supabaseApi": {
+          "id": "gk2rBjn0VRnz3ziw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "25c9e343-72be-4020-90b9-081eaa60949b",
+              "leftValue": "={{ ($items(\"Get many rows2\") || []).length > 0 }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -976,
+        560
+      ],
+      "id": "86511b64-b690-4f75-be12-2056c2409f04",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "2198f95f-00a7-4d60-a9cb-160e5a0061ea",
+        "responseMode": "lastNode",
+        "responseData": "allEntries",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -2624,
+        -544
+      ],
+      "id": "235584eb-44ba-40a8-bb1f-a1c5210e61a3",
+      "name": "Inbound Webhook",
+      "webhookId": "2198f95f-00a7-4d60-a9cb-160e5a0061ea"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.item.json.body;\n\nconst requiredFields = [\n  \"firstName\",\n  \"lastName\",\n  \"email\",\n  \"website\",\n  \"phoneNumber\",\n  \"companyName\",\n  \"linkedInURL\"\n];\n\nfor (const field of requiredFields) {\n  if (!input[field]) {\n    throw new Error(`Missing required field: ${field}`);\n  }\n}\n\nreturn input;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2400,
+        -544
+      ],
+      "id": "df638297-1836-415c-b14b-c8e7c33158f4",
+      "name": "Validate Required Fields"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.item.json;\n\nreturn {\n  json: {\n    prompt: `Generate a personalized LinkedIn messaging sequence for a \nB2B SaaS company named ${input.companyName}. The prospect is at \nthis LinkedIn profile: ${input.linkedInURL}. Include the prospect's first \nname: ${input.firstName}, last name: ${input.lastName}, website: ${input.website}, \nphone number: ${input.phoneNumber}.`,\n\n    toEmail: input.email,  // For SMTP Node\n    name: `${input.firstName} ${input.lastName}`,  // Full name for greeting\n    company: input.companyName,\n    linkedIn: input.linkedInURL\n  }\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2176,
+        -432
+      ],
+      "id": "155c8757-0681-48f6-a95d-b5b58c3da623",
+      "name": "Prepare AI Prompt"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://gemini-server-wheat.vercel.app/generate",
+        "sendBody": true,
+        "specifyBody": "=json",
+        "bodyParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "jsonBody": "={\n  \"prompt\": \"Generate a personalized LinkedIn messaging sequence for a B2B SaaS company named {{$json.companyName}}. The prospect's LinkedIn profile is {{$json.linkedInURL}}. Their name is {{$json.firstName}} {{$json.lastName}}, website: {{$json.website}}, phone number: {{$json.phoneNumber}}. Use a friendly and professional tone. Return ONLY the sequence. Do NOT include Markdown formatting or JSON. Just the message sequence in plain text.\",\n  \"toEmail\": \"{{$json.email}}\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1728,
+        -432
+      ],
+      "id": "2531fc89-9fbd-4ce1-99b8-3520d21c75a6",
+      "name": "Generate Outreach Sequence (Gemini API)"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -1504,
+        -528
+      ],
+      "id": "540dcaca-fdf6-47c4-ba6a-356b526e7957",
+      "name": "Merge Prospect + AI Response"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  {\n    json: {\n      firstName: $json.firstName,\n      lastName: $json.lastName,\n      middleName: $json.middleName || '',\n      website: $json.website,\n      phoneNumber: $json.phoneNumber,\n      companyName: $json.companyName,\n      linkedInURL: $json.linkedInURL,\n      email: $json.email,\n      aiResponse: $json.response.candidates[0].content.parts[0].text,\n      timestamp: new Date().toISOString(),\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1280,
+        -528
+      ],
+      "id": "8f0d90d4-edd3-4ea3-be9b-133f3d636e98",
+      "name": "Format for DB"
+    },
+    {
+      "parameters": {
+        "tableId": "outreach_data",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "firstName",
+              "fieldValue": "={{$input.item.json.firstName}}"
+            },
+            {
+              "fieldId": "lastName",
+              "fieldValue": "= {{$input.item.json.lastName}}"
+            },
+            {
+              "fieldId": "MiddleName",
+              "fieldValue": "= {{$input.item.json.middleName}}"
+            },
+            {
+              "fieldId": "website",
+              "fieldValue": "= {{$input.item.json.website}}"
+            },
+            {
+              "fieldId": "PhoneNumber",
+              "fieldValue": "={{$input.item.json.phoneNumber}}"
+            },
+            {
+              "fieldId": "companyName",
+              "fieldValue": "={{$input.item.json.companyName}}"
+            },
+            {
+              "fieldId": "linkedInURL",
+              "fieldValue": "={{$input.item.json.linkedInURL}}"
+            },
+            {
+              "fieldId": "=aiResponse",
+              "fieldValue": "={{$input.item.json.aiResponse}}"
+            },
+            {
+              "fieldId": "timestamp",
+              "fieldValue": "={{new Date().toISOString()}}"
+            },
+            {
+              "fieldId": "email",
+              "fieldValue": "={{$input.item.json.email}}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -1056,
+        -432
+      ],
+      "id": "39272637-b9b6-4600-baca-0ba2c2f5f819",
+      "name": "Save Outreach Data (Supabase)",
+      "alwaysOutputData": false,
+      "credentials": {
+        "supabaseApi": {
+          "id": "gk2rBjn0VRnz3ziw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "tonystark57ts@gmail.com",
+        "toEmail": "={{ $json[\"email\"] }}",
+        "html": "=<h2>Hello {{ $json[\"firstName\"] }},</h2>\n<p>Here’s your personalized LinkedIn outreach sequence:</p>\n\n<pre style=\"background-color:#f2f2f2;padding:10px;\">\n{{ $json[\"aiResponse\"] }}\n</pre>\n\n<p>Regards,<br/>Tony’s AI Assistant 🤖</p>\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        -832,
+        -432
+      ],
+      "id": "22e1f770-a766-472a-be61-cf0a6b150242",
+      "name": "Send Outreach Email",
+      "webhookId": "e4643e55-603d-4d5e-aa25-f3b9abceb8ac",
+      "credentials": {
+        "smtp": {
+          "id": "MmD0gwisO1k73vyS",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const startTime = $items(\"Start Timer\")[0].json.startTime;\nconst endTime = Date.now();\n\nconst executionTime = endTime - startTime;\nconst now = new Date().toISOString();\n\nconst response = $json.response || '';\nconst status = response.includes(\"OK\") ? \"Success\" : \"Error\";\n\nreturn {\n  apiName: \"Email\", // or Email or Retell — change dynamically if needed\n  status,\n  timeTaken: executionTime,\n  timestamp: now\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -608,
+        -432
+      ],
+      "id": "7ff45950-604e-4cee-84bd-9eff2441fa3f",
+      "name": "Log Email Status"
+    },
+    {
+      "parameters": {
+        "tableId": "=api_logs",
+        "dataToSend": "=defineBelow",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "apiName",
+              "fieldValue": "={{ $json.apiName }}"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "= {{ $json.status }}"
+            },
+            {
+              "fieldId": "timeTaken",
+              "fieldValue": "={{ $json.timeTaken }}"
+            },
+            {
+              "fieldId": "timestamp",
+              "fieldValue": "={{ $json.timestamp }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -384,
+        -432
+      ],
+      "id": "e60d8e81-467e-45fd-8b2d-06919c0b32c5",
+      "name": "Save API Logs",
+      "credentials": {
+        "supabaseApi": {
+          "id": "gk2rBjn0VRnz3ziw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -160,
+        -512
+      ],
+      "id": "05a388c8-98b9-41e1-b354-62fef422c58b",
+      "name": "Merge Data Before Scraper"
+    },
+    {
+      "parameters": {
+        "jsCode": "let website = $json.website || '';\n\n// Same protocol check\nif (!website.startsWith('http://') && !website.startsWith('https://')) {\n  website = 'https://' + website;\n}\n\nreturn {\n  json: {\n    ...$json,\n    website\n  }\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        64,
+        -512
+      ],
+      "id": "44ddf538-61aa-4b0c-9413-79965ea786e6",
+      "name": "Fix Website URL"
+    },
+    {
+      "parameters": {
+        "command": "=node /Users/admin/OneDrive/Desktop/linkedin-scraper/cli.js \"{{$json[\"linkedInURL\"]}}\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        288,
+        -512
+      ],
+      "id": "f7e6f289-c2b7-4d17-bec6-ebc111ae7eb9",
+      "name": "LinkedIn Scraper"
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "import json\nimport re\n\n# Input: full command stdout\nraw_output = items[0]['json']['stdout']\n\n# Step 1: Extract the last JSON object from the stdout using regex\nmatches = re.findall(r'\\{.*\\}', raw_output, re.DOTALL)\n\nif not matches:\n    raise ValueError(\"No JSON found in stdout\")\n\n# Get the last JSON object from matches (which should be the scraped data)\nraw_json = matches[-1]\n\n# Step 2: Parse JSON\ndata = json.loads(raw_json)\n\n# Step 3: Clean fields\ncleaned = {\n    'name': data.get('name', 'Unknown').strip(),\n    'headline': data.get('headline', 'Unknown').strip(),\n    'industry': data.get('industry', 'Unknown').strip(),\n    'companySize': data.get('companySize', 'Unknown').strip(),\n    'location': data.get('location', 'Unknown').strip(),\n    'followers': data.get('followers', 'Unknown').strip(),\n    'website': data.get('website', 'Unknown').strip(),\n    'timestamp': data.get('timestamp', '').strip()\n}\n\n# Step 4: Return cleaned output\nreturn [{ 'json': cleaned }]\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        512,
+        -512
+      ],
+      "id": "75711faa-1b7c-48ca-94a4-cbc2238db2dc",
+      "name": "Scraper Data Cleaning"
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "import json\n\n# Extract JSON input from n8n\ndata = items[0]['json']\n\n# Compose the Retell AI prompt\nprompt = f\"\"\"\nYou are an industry-grade AI Voice Caller working for a real estate firm.\n\nYour job is to call **{data.get('firstName', 'N/A')} {data.get('lastName', '')}**, a representative of **{data.get('companyName', 'N/A')}**.\n\n📌 Use the following data to guide your call:\n- 🧑 LinkedIn Profile: {data.get('linkedInURL', 'N/A')}\n- 🌐 Website: {data.get('website', 'N/A')}\n- 🏭 Industry: {data.get('industry', 'N/A')}\n- 👥 Company Size: {data.get('companySize', 'N/A')}\n- 🤖 AI-Generated LinkedIn Cold Outreach Sequence: \n{data.get('aiResponse', 'N/A')}\n\n🎯 Goal:\nBook a discovery appointment on cal.com with the prospect.\n\n📞 Instructions:\nYour call should feel human, enthusiastic, and consultative — not robotic. Start with a soft opener, mention their industry or website, reference their LinkedIn profile, and bring up your offer as a real estate firm that helps businesses find the perfect workspaces.\n\n💬 Include these in the script:\n1. Opening: Greet and confirm if it's a good time to chat.\n2. Personal Hook: Mention something from their company, size, or site.\n3. Pitch: Explain who you are and why you're calling.\n4. Value Prop: Benefits of using your real estate services.\n5. Objection Handling: Prepare for responses like “We’re not looking”, “Send me an email”, or “Too busy”.\n6. Call-to-Action: Try to book a call directly on cal.com.\n\n🔁 Alternate Paths:\n- If they ask about pricing, offer to discuss in the cal.com call.\n- If they seem interested but busy, offer to follow up with a booking link.\n- If uninterested, thank them and move on politely.\n\n📅 Closing:\n“Would you be open to a quick 15-minute call next week? I can send over a cal.com link right now.”\n\n🗂 Include fallback scripts and transitions.\n\n\"\"\" + \"\\n\\n\" + (\"# Expand here with up to 22,000 characters of detailed script, examples, fallback conversations, and templates.\" * 50)\n\n# Output final prompt\nreturn [{ 'json': { 'prompt': prompt } }]\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        736,
+        -512
+      ],
+      "id": "ed52173d-eac8-4c56-a437-c3b0bf316d87",
+      "name": "Data Format( Retell Prompt)"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{\n  json: {\n    from_number: \"+16292631068\",\n    to_number: \"+918184835291\",\n    prompt: $input.all()[0].json.prompt,\n    voiceId: \"agent_bdf7d7b13d952dfc68cba2a52d\",\n    language: \"en-US\"\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        -512
+      ],
+      "id": "70b00c1d-1c5e-4d90-a6de-10d4dede355c",
+      "name": "Final format (Retell Payload)"
+    },
+    {
+      "parameters": {
+        "jsCode": "const firstName = $node[\"Fix Website URL\"].json.firstName || \"there\";\nconst lastName = $node[\"Fix Website URL\"].json.lastName || \"\";\nconst companyName = $node[\"Fix Website URL\"].json.companyName || \"your company\";\nconst industry = $node[\"Fix Website URL\"].json.industry || \"Unknown industry\";\nconst companySize = $node[\"Fix Website URL\"].json.companySize || \"Unknown size\";\nconst location = $node[\"Fix Website URL\"].json.location || \"Unknown location\";\nconst website = $node[\"Fix Website URL\"].json.website || \"Not provided\";\nconst linkedInURL = $node[\"Fix Website URL\"].json.linkedInURL || \"Not available\";\nconst email = $node[\"Fix Website URL\"].json.email || \"your@email.com\";\n\nconst calLink = \"https://cal.com/your-link\";\nconst yourNumber = \"+16292631068\";\n\n// ==================== FULL SCRIPT ====================\nlet template = `\n# REAL ESTATE AI VOICE CALLER SCRIPT\n\nHi ${firstName}, this is Alex Morgan from Prestige Properties. \nI was researching companies in the ${industry} space and came across ${companyName} - really impressed with what you're building. \nDo you have 90 seconds to discuss your office space needs?\n\n---\n\n## VALUE PROPOSITION\n\"Our clients typically achieve 3 key benefits:\n1. Cost Reduction: 15-30% lower occupancy costs\n2. Productivity Boost: Workspace designs that increase team collaboration\n3. Flexibility: Scalable solutions that grow with your business\n\nWe recently helped a ${companySize} ${industry} company in ${location} save significant costs while doubling collaboration space.\"\n\n---\n\n## OBJECTION HANDLING\n\n**\"We're not looking right now\"**\n\"Completely understand, ${firstName}. Most companies we work with weren’t actively looking when we first spoke. This is the best time to explore without pressure.\"\n\n**\"Send me an email\"**\n\"Happy to follow up at ${email}. To make it valuable, what specific challenges are you facing?\"\n\n**\"We just renewed our lease\"**\n\"Congrats! Renewal is often the best time to negotiate better terms. Worth a quick chat?\"\n\n**\"Too expensive\"**\n\"I appreciate budget concerns, ${firstName}. Our service usually pays for itself — consultation is free.\"\n\n**\"We're remote/hybrid\"**\n\"Many ${industry} companies are hybrid. We’re helping firms in ${location} set up hub-and-spoke models.\"\n\n---\n\n## CAL.COM BOOKING\n\"${firstName}, I’d love to show you options for ${companyName}. \nI have slots Tuesday or Wednesday — which works better? \nOtherwise I can send a booking link: ${calLink}\"\n\n---\n\n## VOICEMAIL SCRIPT\n\"Hi ${firstName}, Alex Morgan from Prestige Properties. \nWe specialize in helping ${industry} companies like ${companyName} optimize office space. \nCall me back at ${yourNumber} or book directly: ${calLink}.\"\n\n---\n\nThis call may be recorded for quality and training purposes. \nAll info is confidential under our privacy policy at prestige-properties.com/privacy.\n`;\n\n// ==================== RETURN TO RETELL ====================\nreturn {\n  json: {\n    from_number: yourNumber,\n    to_number: $json.phoneNumber || $node[\"Fix Website URL\"].json.phoneNumber,\n    prompt: template,\n    voiceId: \"agent_bdf7d7b13d952dfc68cba2a52d\",\n    language: \"en-US\"\n  }\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1168,
+        -512
+      ],
+      "id": "820200a1-e1f2-4902-8a8d-833632ff2557",
+      "name": "Retell Call Script"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.retellai.com/v2/create-phone-call",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpBearerAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer key_25414031a5a885a13587eafd6e5e"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1408,
+        -512
+      ],
+      "id": "bd471311-3486-452f-988a-4375385b1263",
+      "name": "Retell Call Request",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "QNXUgFUuY2ezu5Ls",
+          "name": "Bearer Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "retell-call-analysis",
+        "responseMode": "lastNode",
+        "responseData": "allEntries",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -2688,
+        560
+      ],
+      "id": "cb8cf9b2-3b26-4fd3-a83a-e20fba1679b4",
+      "name": "Call Analysis Webhook",
+      "webhookId": "367e1639-1398-4fae-9a76-3dde23078495"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Code11 — Robust \"unsuccessful call\" detector for n8n\n\n// ---------- helpers ----------\nconst pick = (obj, paths, fallback = undefined) => {\n  for (const p of paths) {\n    try {\n      const v = p.split('.').reduce((o, k) => o?.[k], obj);\n      if (v !== undefined && v !== null) return v;\n    } catch {}\n  }\n  return fallback;\n};\n\nconst toLower = (x) => (typeof x === 'string' ? x.toLowerCase() : '');\n\n// ---------- pull common fields from many shapes ----------\nconst body = $json.body ?? $json ?? {};\nconst call  = pick(body, ['call','payload.call','data.call','event.call']) || body;\n\nconst transcript =\n  pick(body, [\n    'call.call_analysis.transcript',\n    'call.CallAnalysis.transcript',\n    'call.transcript',\n    'transcript',\n    'payload.transcript',\n    'data.transcript'\n  ], '') || '';\n\nconst normalizedTranscript = toLower(transcript);\n\n// disconnection / status from various places\nconst disconnectionReason =\n  toLower(\n    pick(call, ['disconnection_reason','ended_reason','hangup_cause','hangup_reason']) ||\n    pick(body, ['disconnection_reason','reason']) ||\n    ''\n  );\n\nconst status = toLower(\n  pick(call, ['status','call_status','state']) ||\n  pick(body, ['status','call_status','state']) ||\n  ''\n);\n\nconst inVoicemailFlag = !!(\n  pick(call, ['call_analysis.in_voicemail','in_voicemail']) ??\n  pick(body, ['in_voicemail'])\n);\n\nconst answeredBy = toLower(\n  pick(call, ['answered_by','machine_detection_result','amd_result']) || ''\n);\n\n// durations in sec\nlet durationSec =\n  Number(pick(call, ['duration_sec','call_duration','total_duration'])) ||\n  (Number(pick(call, ['duration_ms'])) ? Number(pick(call, ['duration_ms']))/1000 : 0);\n\n// fallback: compute from timestamps if needed\nif (!durationSec) {\n  const start = pick(call, ['start_timestamp','started_at']);\n  const end   = pick(call, ['end_timestamp','ended_at']);\n  if (start && end) {\n    const s = new Date(start).getTime();\n    const e = new Date(end).getTime();\n    if (!Number.isNaN(s) && !Number.isNaN(e) && e > s) {\n      durationSec = Math.round((e - s) / 1000);\n    }\n  }\n}\n\n// outcome hints (if upstream analyzer already set something)\nconst outcomePayload =\n  pick(call, ['call_analysis.custom_analysis_data.Outcome']) ||\n  pick(call, ['CallAnalysis.custom_analysis_data.Outcome']) ||\n  pick(body, ['Outcome','outcome']) ||\n  '';\n\nconst outcomeLower = toLower(outcomePayload);\n\n// ---------- classify granular flags ----------\nconst reasonStr = `${disconnectionReason} ${status} ${answeredBy} ${normalizedTranscript}`;\n\n// Busy / No answer / Failed / Rejected / Invalid\nconst isBusy =\n  /\\bbusy\\b|dial_busy|user_busy/.test(reasonStr);\n\nconst isNoAnswer =\n  /no[\\s\\-]?answer|dial_no_answer|timeout|ring[-\\s]?timeout|not\\s*answered/.test(reasonStr);\n\nconst isFailedNetwork =\n  /network|system|signaling|unavailable|gateway|failed|congestion|error|invalid[_\\s-]?number|not\\s*reachable/.test(reasonStr);\n\nconst isRejected =\n  /rejected|declined|blocked|dnd|do[-\\s]?not[-\\s]?disturb/.test(reasonStr);\n\nconst amdMachine =\n  /machine|voicemail|answering\\s*machine/.test(answeredBy);\n\n// Voicemail detection (explicit flag + transcript cues)\nconst vmCues = [\n  'voicemail','voice mail','leave a message','after the tone','beep',\n  'mailbox is full','cannot take your call','not available to take your call'\n];\nconst isVoicemail =\n  inVoicemailFlag || vmCues.some(c => normalizedTranscript.includes(c));\n\n// Human speech heuristic (do we see real user utterances?)\nconst hasUserPrefix = /\\buser:\\s*\\S+/i.test(transcript);\nconst humanWordCues = /(\\bhello\\b|\\bhi\\b|\\byes\\b|\\bspeaking\\b|\\bthis is\\b|\\bi want\\b|\\bplease\\b|\\bokay\\b)/i;\nconst hasHumanSpeech = hasUserPrefix || humanWordCues.test(transcript);\n\n// Very short calls with no human speech\nconst shortCall = (durationSec > 0 && durationSec < 8 && !hasHumanSpeech);\n\n// Outcome-based positives\nconst outcomePositive =\n  /\\bbook|appointment|schedule|meeting|interested|qualified|connected|human\\b/.test(outcomeLower);\n\n// If payload says machine, treat as machine even if transcript has words like \"leave a message\"\nconst isMachine = amdMachine || (isVoicemail && !hasHumanSpeech);\n\n// ---------- final decision ----------\n// A call is \"unsuccessful\" when:\n// - voicemail OR machine detection OR busy OR no answer OR failed network OR rejected\n// - OR it's a very short call with no human speech\n// BUT if analyzer already declared a positive outcome, override to successful.\nlet isUnsuccessful =\n  isVoicemail ||\n  isMachine ||\n  isBusy ||\n  isNoAnswer ||\n  isFailedNetwork ||\n  isRejected ||\n  shortCall;\n\nif (outcomePositive) {\n  isUnsuccessful = false;\n}\n\n// ---------- optional debug (safe extra fields) ----------\nconst debug = {\n  status,\n  disconnectionReason,\n  answeredBy,\n  durationSec,\n  flags: {\n    isVoicemail,\n    isMachine,\n    isBusy,\n    isNoAnswer,\n    isFailedNetwork,\n    isRejected,\n    shortCall,\n    hasHumanSpeech,\n    outcomePositive\n  },\n  outcomePayload\n};\n\n// Return original payload plus the decision\nreturn {\n  ...$json,\n  isUnsuccessful,\n  // comment out 'debug' if you don't want extra fields going downstream\n  debug\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2208,
+        544
+      ],
+      "id": "cb6efe8b-3671-48ad-9436-1364dc590b4c",
+      "name": "Detect Unsuccessful Call"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ---------- Helpers ----------\nconst get = (obj, paths) => {\n  for (const p of paths) {\n    try {\n      const v = p.split('.').reduce((o,k)=>o?.[k], obj);\n      if (v !== undefined && v !== null) return v;\n    } catch {}\n  }\n  return undefined;\n};\n\nconst now = new Date();\n\n// ---------- 1) Pull raw fields from many possible shapes ----------\nconst body = $json.body ?? $json ?? {};\nconst callObj = get(body, [\n  'call', 'payload.call', 'data.call', 'event.call'\n]) || body;\n\nconst transcriptRaw =\n  get(body, [\n    'call.call_analysis.transcript',\n    'call.CallAnalysis.transcript',\n    'call.transcript',\n    'transcript',\n    'payload.transcript',\n    'data.transcript'\n  ]) || \"\";\n\nconst outcomeFromPayload =\n  get(body, [\n    'call.call_analysis.custom_analysis_data.Outcome',\n    'call.CallAnalysis.custom_analysis_data.Outcome',\n    'call.custom_analysis_data.Outcome',\n    'Outcome',\n  ]);\n\nconst inVoicemailFlag =\n  !!get(body, [\n    'call.call_analysis.in_voicemail',\n    'call.CallAnalysis.in_voicemail',\n    'in_voicemail'\n  ]);\n\nconst bookingTimeRaw =\n  get($json, ['booking_response.time', 'booking.time']) ||\n  get(body, ['booking_response.time', 'booking.time']);\n\nconst agentId =\n  get(body, ['call.agent_id', 'agent_id']) || null;\n\nconst retellCallId =\n  get(body, ['call.call_id','call.id','retell_call_id']) || null;\n\nconst startTs =\n  get(body, ['call.start_timestamp','start_timestamp','call.started_at']) || null;\n\nconst endTs =\n  get(body, ['call.end_timestamp','end_timestamp','call.ended_at']) || null;\n\nconst disconnectionReason =\n  get(body, ['call.disconnection_reason','disconnection_reason','reason']) || null;\n\nconst phoneNumber =\n  get(body, ['call.to_number','to_number','phone','phone_number']) || null;\n\nconst fromEmailIncoming =\n  get($json, ['from_email','email.from','sender']) ||\n  get(body, ['from_email','email.from','sender']) || null;\n\nconst prospectId =\n  get($json, ['prospect_id','prospect.id']) ||\n  get(body, ['prospect_id','prospect.id']) || null;\n\n// ---------- 2) Normalize transcript ----------\nconst transcript = (transcriptRaw || \"\").toString();\nconst tLower = transcript.toLowerCase();\n\n// ---------- 3) Robust voicemail detection ----------\nlet isVoicemail = !!inVoicemailFlag;\nif (!isVoicemail) {\n  const vmHints = [\n    'voicemail','voice mail','leave a message','beep','after the tone',\n    'not available right now','leave your message','mailbox is full'\n  ];\n  isVoicemail = vmHints.some(h => tLower.includes(h));\n}\n\n// ---------- 4) Robust email extraction ----------\nfunction spelledEmailToNormal(text) {\n  let s = ` ${text.toLowerCase()} `;\n\n  // Convert common words -> symbols\n  s = s.replace(/\\bat the rate of\\b|\\bat the rate\\b|\\bat\\b/g, ' @ ');\n  s = s.replace(/\\b(dot|period)\\b/g, '.');\n  s = s.replace(/\\b(underscore)\\b/g, '_');\n  s = s.replace(/\\b(hyphen|dash)\\b/g, '-');\n  s = s.replace(/\\b(plus|plus sign)\\b/g, '+');\n\n  // Handle compound numbers like \"seventy eight\" -> 78\n  const numWords = {\n    zero:'0', oh:'0', one:'1', two:'2', three:'3', four:'4', five:'5',\n    six:'6', seven:'7', eight:'8', nine:'9', ten:'10',\n    eleven:'11', twelve:'12', thirteen:'13', fourteen:'14',\n    fifteen:'15', sixteen:'16', seventeen:'17', eighteen:'18',\n    nineteen:'19', twenty:'20', thirty:'30', forty:'40',\n    fifty:'50', sixty:'60', seventy:'70', eighty:'80', ninety:'90'\n  };\n\n  s = s.replace(/\\b(seventy|eighty|ninety|twenty|thirty|forty|fifty|sixty)\\s+(one|two|three|four|five|six|seven|eight|nine)\\b/g,\n    (m,a,b)=> String(parseInt(numWords[a]) + parseInt(numWords[b])));\n\n  s = s.replace(/\\b(zero|oh|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen)\\b/g,\n    (m)=> numWords[m]);\n\n  // Collapse spaces around @ and .\n  s = s.replace(/\\s*@\\s*/g, '@');\n  s = s.replace(/\\s*\\.\\s*/g, '.');\n\n  // Remove stray spaces between characters inside email candidates\n  s = s.replace(/([a-z0-9])\\s+(?=[a-z0-9@._\\-+])/g, '$1');\n\n  return s.trim();\n}\n\nlet userEmail = null;\n// 1) direct email in transcript\nlet m = transcript.match(/[a-zA-Z0-9._%+\\-]+@[a-zA-Z0-9.\\-]+\\.[a-zA-Z]{2,}/);\nif (m) {\n  userEmail = m[0];\n} else {\n  // 2) spelled-out email\n  const normalized = spelledEmailToNormal(transcript);\n  let m2 = normalized.match(/[a-z0-9._%+\\-]+@[a-z0-9.\\-]+\\.[a-z]{2,}/);\n  if (m2) userEmail = m2[0];\n}\n\n// ---------- 5) Robust outcome classification ----------\nconst outcomePatterns = {\n  \"Rejected Offer\": [\n    'not interested','no thanks','don\\'t need','reject','stop calling','go away','already have',\n    'no longer','not now','not looking','remove me','unsubscribe','do not call'\n  ],\n  \"Booked Appointment\": [\n    'book','schedule','set up','arrange','appointment','reserve','meeting','slot','confirmed',\n    'let’s meet','lets meet','see you','calendar','cal dot com','cal.com','availability'\n  ],\n  \"Interested\": [\n    'interested','tell me more','sounds good','send info','send me details','email me',\n    'want to know','curious','open to discuss','looking forward','follow up'\n  ],\n  \"Voicemail\": [\n    'voicemail','voice mail','beep','leave a message','after the tone','mailbox'\n  ],\n  \"Busy/No Answer\": [\n    'busy','call me later','not a good time','can’t talk','cannot talk','driving','meeting now',\n    'no answer','missed call','try later'\n  ]\n};\n\nlet outcome = outcomeFromPayload || \"Unknown\";\nif (outcome === \"Unknown\" || !outcome) {\n  for (const [label, pats] of Object.entries(outcomePatterns)) {\n    if (pats.some(p => tLower.includes(p))) {\n      outcome = label;\n      break;\n    }\n  }\n  if (outcome === \"Unknown\" && isVoicemail) outcome = \"Voicemail\";\n}\n\n// ---------- 6) Flexible date/time parsing ----------\nconst months = {\n  january:0,february:1,march:2,april:3,may:4,june:5,\n  july:6,august:7,september:8,october:9,november:10,december:11\n};\nconst ordinals = {\n  \"first\":1,\"second\":2,\"third\":3,\"fourth\":4,\"fifth\":5,\"sixth\":6,\"seventh\":7,\"eighth\":8,\"ninth\":9,\"tenth\":10,\n  \"eleventh\":11,\"twelfth\":12,\"thirteenth\":13,\"fourteenth\":14,\"fifteenth\":15,\"sixteenth\":16,\"seventeenth\":17,\n  \"eighteenth\":18,\"nineteenth\":19,\"twentieth\":20,\"twenty first\":21,\"twenty second\":22,\"twenty third\":23,\n  \"twenty fourth\":24,\"twenty fifth\":25,\"twenty sixth\":26,\"twenty seventh\":27,\"twenty eighth\":28,\"twenty ninth\":29,\n  \"thirtieth\":30,\"thirty first\":31\n};\nconst weekdays = {sunday:0,monday:1,tuesday:2,wednesday:3,thursday:4,friday:5,saturday:6};\nconst numberWords = {one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,eleven:11,twelve:12};\n\nfunction parseTimePhrase(text) {\n  if (!text) return { hour: 9, minute: 0, confidence: 'default' };\n  let s = text.toLowerCase().trim();\n\n  if (/\\bnoon\\b/.test(s)) return { hour: 12, minute: 0, confidence: 'exact' };\n  if (/\\bmidnight\\b/.test(s)) return { hour: 0, minute: 0, confidence: 'exact' };\n\n  let m = s.match(/\\b([01]?\\d|2[0-3])[:.]?([0-5]\\d)\\b/);\n  if (m) return { hour: parseInt(m[1],10), minute: parseInt(m[2],10), confidence: 'exact' };\n\n  m = s.match(/\\b(\\d{1,2})(?::(\\d{2}))?\\s*(am|pm)?\\b/);\n  if (m) {\n    let hour = parseInt(m[1],10);\n    let minute = m[2] ? parseInt(m[2],10) : 0;\n    const ampm = m[3];\n    if (ampm === 'pm' && hour < 12) hour += 12;\n    if (ampm === 'am' && hour === 12) hour = 0;\n    if (!ampm) {\n      if (/\\bmorning\\b/.test(s) && hour === 12) hour = 0;\n      if (/\\b(afternoon|evening|night|tonight)\\b/.test(s) && hour < 12) hour += 12;\n    }\n    return { hour, minute, confidence: ampm ? 'exact' : 'partial' };\n  }\n\n  return { hour: 9, minute: 0, confidence: 'default' };\n}\n\nfunction toISO(y, m, d, hh, mm) {\n  const dt = new Date(y, m, d, hh, mm, 0, 0);\n  return isNaN(dt) ? null : dt.toISOString();\n}\n\nfunction nextWeekday(start, targetDow, inclusive) {\n  const d = new Date(start);\n  let diff = (targetDow - d.getDay() + 7) % 7;\n  if (!inclusive || diff === 0) diff = (diff === 0) ? 7 : diff;\n  d.setDate(d.getDate() + diff);\n  return d;\n}\n\n// UPDATED: capture last valid appointment\nfunction parseAppointmentISO() {\n  let last = null;\n\n  function set(matchISO) {\n    if (matchISO) last = matchISO;\n  }\n\n  // Try each pattern but do not return early, keep last\n  // (for brevity I’m showing only one example, but repeat for each block in your code)\n\n  // A) Month first\n  let m = tLower.matchAll(/\\b(january|february|march|april|may|june|july|august|september|october|november|december)\\s+(\\d{1,2})(?:st|nd|rd|th)?(?:\\s*(?:at|@)\\s*([a-z0-9 :.\\']+(?:am|pm)?))?/g);\n  for (const mm of m) {\n    const monthIdx = months[mm[1]];\n    const day = parseInt(mm[2],10);\n    const timeStr = mm[3];\n    const { hour, minute } = parseTimePhrase(timeStr || '');\n    set({ iso: toISO(now.getFullYear(), monthIdx, day, hour, minute), confidence: 'absolute-month-first' });\n  }\n\n  // TODO: repeat same approach for all other date patterns...\n\n  return last || { iso:null, confidence:'none' };\n}\n\nconst parsed = parseAppointmentISO();\nlet appointmentTimeISO = parsed.iso;\n\nif ((!outcome || outcome === 'Unknown') && appointmentTimeISO) {\n  outcome = 'Booked Appointment';\n}\n\n// ---------- 7) Auto email fields when booked ----------\nlet emailSent = false;\nlet emailSubject = null;\nlet emailSentAt = null;\nlet emailAccount = null;\n\nif (outcome === \"Booked Appointment\" && appointmentTimeISO) {\n  emailSent = true;\n  const dt = new Date(appointmentTimeISO);\n  emailSubject = `Appointment Confirmation – ${dt.toDateString()} ${dt.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}`;\n  emailSentAt = new Date().toISOString();\n  emailAccount = fromEmailIncoming || \"n8n-default\";\n}\n\n// ---------- 8) Summary (fallback) ----------\nconst callSummary =\n  get(body, [\n    'call.call_analysis.call_summary',\n    'call.CallAnalysis.call_summary',\n    'call.summary',\n    'summary'\n  ]) || null;\n\n// ---------- 9) Build final item ----------\nconst item = {\n  id: prospectId ?? null,\n  prospect_id: prospectId ?? null,\n\n  agent_id: agentId,\n  retell_call_id: retellCallId,\n\n  phone_number: phoneNumber ?? null,\n  start_timestamp: startTs,\n  end_timestamp: endTs,\n  disconnection_reason: disconnectionReason,\n\n  is_voicemail: !!isVoicemail,\n  tone: outcome,\n  outcome: outcome,\n  summary: callSummary,\n  transcript: transcript,\n\n  created_at: new Date().toISOString(),\n\n  email_sent: emailSent,\n  email_subject: emailSubject,\n  email_sent_at: emailSentAt,\n  email_account: emailAccount,\n\n  next_step:\n    outcome === 'Booked Appointment' ? 'Booked Appointment' :\n    outcome === 'Interested'         ? 'Send Follow-up Email' :\n    outcome === 'Rejected Offer'     ? 'Stop Outreach' :\n    outcome === 'Voicemail'          ? 'Retry Call' :\n    outcome === 'Busy/No Answer'     ? 'Retry Call' :\n    null,\n\n  appointment_time: appointmentTimeISO,\n\n  flagged_for_review: outcome === 'Unknown',\n  notes: null,\n\n  to_email: userEmail,\n  from_email: fromEmailIncoming,\n\n  call_analysis: get(body, ['call.call_analysis','call.CallAnalysis']) || null,\n\n  parser_meta: {\n    appointment_confidence: parsed.confidence,\n    voicemail_flag_from_payload: inVoicemailFlag,\n  }\n};\n\n// ---------- 10) Output as n8n item array ----------\nreturn [ item ];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1392,
+        560
+      ],
+      "id": "3d063442-d50d-4589-9a36-e9e5bf32a067",
+      "name": "Parse & Normalize Call Data"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -1696,
+        560
+      ],
+      "id": "2d118ed0-0039-41cd-b212-4ed9466b855a",
+      "name": "Merge Call + Prospect"
+    },
+    {
+      "parameters": {
+        "tableId": "call_logs",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "phone_number",
+              "fieldValue": "={{ $json.phone_number }}"
+            },
+            {
+              "fieldId": "start_timestamp",
+              "fieldValue": "={{ new Date($json.start_timestamp).toISOString() }}"
+            },
+            {
+              "fieldId": "end_timestamp",
+              "fieldValue": "={{ new Date($json.end_timestamp).toISOString() }}"
+            },
+            {
+              "fieldId": "disconnection_reason",
+              "fieldValue": "={{ $json.disconnection_reason }}"
+            },
+            {
+              "fieldId": "outcome",
+              "fieldValue": "={{ $json.outcome}}"
+            },
+            {
+              "fieldId": "summary",
+              "fieldValue": "={{ $json.call_analysis?.call_summary ?? null }}"
+            },
+            {
+              "fieldId": "transcript",
+              "fieldValue": "={{ $json.transcript ?? null }}"
+            },
+            {
+              "fieldId": "created_at",
+              "fieldValue": "={{ $json.created_at}}"
+            },
+            {
+              "fieldId": "email_sent_at",
+              "fieldValue": "={{ $json.email_sent_at }}"
+            },
+            {
+              "fieldId": "email_subject",
+              "fieldValue": "={{ $json.email_subject }}"
+            },
+            {
+              "fieldId": "from_email",
+              "fieldValue": "tonystark57ts@gmail.com"
+            },
+            {
+              "fieldId": "to_email",
+              "fieldValue": "={{ $json.to_email }}"
+            },
+            {
+              "fieldId": "appointment_time",
+              "fieldValue": "={{ $json.appointment_time }}"
+            },
+            {
+              "fieldId": "next_step",
+              "fieldValue": "={{ $json.next_step }}"
+            },
+            {
+              "fieldId": "flagged_for_review",
+              "fieldValue": "={{ $json.flagged_for_review }}"
+            },
+            {
+              "fieldId": "retell_call_id",
+              "fieldValue": "={{ $json.retell_call_id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -640,
+        704
+      ],
+      "id": "b6fd3991-55eb-4fee-9a92-43ef698c7571",
+      "name": "Save Call Log",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "gk2rBjn0VRnz3ziw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "call_logs",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "retell_call_id",
+              "condition": "eq",
+              "keyValue": "={{ $json.retell_call_id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "phone_number",
+              "fieldValue": "={{ $json.phone_number }}"
+            },
+            {
+              "fieldId": "start_timestamp",
+              "fieldValue": "={{ new Date($json.start_timestamp).toISOString() }}"
+            },
+            {
+              "fieldId": "end_timestamp",
+              "fieldValue": "={{ new Date($json.end_timestamp).toISOString() }}"
+            },
+            {
+              "fieldId": "disconnection_reason",
+              "fieldValue": "={{ $json.disconnection_reason }}"
+            },
+            {
+              "fieldId": "outcome",
+              "fieldValue": "={{ $json.outcome}}"
+            },
+            {
+              "fieldId": "summary",
+              "fieldValue": "={{ $json.call_analysis?.call_summary ?? null }}"
+            },
+            {
+              "fieldId": "transcript",
+              "fieldValue": "={{ $json.transcript ?? null }}"
+            },
+            {
+              "fieldId": "created_at",
+              "fieldValue": "={{ $json.created_at}}"
+            },
+            {
+              "fieldId": "email_sent_at",
+              "fieldValue": "={{ $json.email_sent_at }}"
+            },
+            {
+              "fieldId": "email_subject",
+              "fieldValue": "={{ $json.email_subject }}"
+            },
+            {
+              "fieldId": "from_email",
+              "fieldValue": "tonystark57ts@gmail.com"
+            },
+            {
+              "fieldId": "to_email",
+              "fieldValue": "={{ $json.to_email }}"
+            },
+            {
+              "fieldId": "appointment_time",
+              "fieldValue": "={{ $json.appointment_time }}"
+            },
+            {
+              "fieldId": "next_step",
+              "fieldValue": "={{ $json.next_step }}"
+            },
+            {
+              "fieldId": "flagged_for_review",
+              "fieldValue": "={{ $json.flagged_for_review }}"
+            },
+            {
+              "fieldId": "retell_call_id",
+              "fieldValue": "={{ $json.retell_call_id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -640,
+        352
+      ],
+      "id": "bbbbd6c1-b9fa-4678-8520-ff1a688f5406",
+      "name": "Update Call Log",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "gk2rBjn0VRnz3ziw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "call_logs",
+        "returnAll": true,
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "is_voicemail",
+              "condition": "eq",
+              "keyValue": "true"
+            },
+            {
+              "keyName": "disconnection_reason",
+              "condition": "eq",
+              "keyValue": "dial_no_answer"
+            },
+            {
+              "keyName": "disconnection_reason",
+              "condition": "eq",
+              "keyValue": "dial_busy"
+            },
+            {
+              "keyName": "disconnection_reason",
+              "condition": "eq",
+              "keyValue": "dial_failed"
+            },
+            {
+              "keyName": "attempts",
+              "condition": "lt",
+              "keyValue": "2"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -96,
+        160
+      ],
+      "id": "9a09c8c1-2877-42e6-ae8b-4c3c5c80f6a0",
+      "name": "Load_All_Prospects",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "gk2rBjn0VRnz3ziw",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Input: Row from Supabase\nconst row = $json;\nconst current = row.attempts ?? 0;\n\nreturn [\n  {\n    json: {\n      attempts: current + 1,\n      retell_call_id: row.retell_call_id,\n      phoneNumber: row.phone_number,\n      prospect_id: row.prospect_id\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        336,
+        160
+      ],
+      "id": "57592801-e419-4ab9-ab79-8bc18489a4e3",
+      "name": "Parse_Retell_Webhook"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "71104ee6-4a86-4f06-968d-c3012e7294ec",
+              "leftValue": "={{ $json.attempts }}",
+              "rightValue": 2,
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        608,
+        160
+      ],
+      "id": "e8b14e13-6b58-45da-bd1d-92a9eecf289c",
+      "name": "Check_Attempt_Count"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "dc479e8e-a42f-49dd-a5b8-f26913d24bb7",
+              "leftValue": "={{ $node[\"Detect Unsuccessful Call\"].json[\"isUnsuccessful\"] }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -320,
+        528
+      ],
+      "id": "80f422dc-167e-423f-b044-659c653fe6d3",
+      "name": "Validate_Call_Outcome"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.retellai.com/v2/create-phone-call",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpBearerAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer key_25414031a5a885a13587eafd6e5e"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"attempts\": {{ $json.attempts }},\n  \"call_id\": \"{{ $json.retell_call_id }}\",\n  \"from_number\": \"+16292631068\",\n  \"to_number\": \"{{ $node['Merge Call + Prospect'].json.PhoneNumber }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1072,
+        0
+      ],
+      "id": "ffa1e2e4-b09f-4406-9cf4-9708a3988d54",
+      "name": "Retry_Retell_Call",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "QNXUgFUuY2ezu5Ls",
+          "name": "Bearer Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        816,
+        336
+      ],
+      "id": "4a673f4a-3535-4f80-be9d-674c4ac41dcb",
+      "name": "Stop_Process"
+    },
+    {
+      "parameters": {
+        "jsCode": "const transcriptRaw = $json.transcript || \"\";\nconst transcript = transcriptRaw.toLowerCase().replace(/[,\\.]/g, \"\");\n\n// --- OUTCOME DETECTION ---\n// Define multiple patterns for each outcome\nconst outcomePatterns = {\n  \"Rejected Offer\": [\n    \"not interested\", \"no thanks\", \"don't need\", \"reject\", \"stop calling\", \"go away\", \"already have\",\n    \"no longer\", \"not now\", \"not looking\"\n  ],\n  \"Booked Appointment\": [\n    \"book\", \"schedule\", \"set up\", \"arrange\", \"appointment\", \"reserve\", \"meeting\", \"slot\", \"confirmed\", \"let’s meet\"\n  ],\n  \"Interested\": [\n    \"interested\", \"tell me more\", \"sounds good\", \"send info\", \"send me details\", \"email me\", \n    \"want to know\", \"curious\", \"open to discuss\", \"looking forward\"\n  ],\n  \"Voicemail\": [\n    \"leave a message\", \"voicemail\", \"not available\", \"call back later\", \"missed call\"\n  ]\n};\n\nlet outcome = \"Unknown\";\nfor (const [label, patterns] of Object.entries(outcomePatterns)) {\n  if (patterns.some(p => transcript.includes(p))) {\n    outcome = label;\n    break;\n  }\n}\n\n// --- ORDINALS ---\nconst ordinals = {\n  \"first\":1,\"second\":2,\"third\":3,\"fourth\":4,\"fifth\":5,\"sixth\":6,\"seventh\":7,\"eighth\":8,\"ninth\":9,\"tenth\":10,\n  \"eleventh\":11,\"twelfth\":12,\"thirteenth\":13,\"fourteenth\":14,\"fifteenth\":15,\"sixteenth\":16,\"seventeenth\":17,\"eighteenth\":18,\"nineteenth\":19,\"twentieth\":20,\n  \"twenty first\":21,\"twenty second\":22,\"twenty third\":23,\"twenty fourth\":24,\"twenty fifth\":25,\"twenty sixth\":26,\"twenty seventh\":27,\"twenty eighth\":28,\"twenty ninth\":29,\n  \"thirtieth\":30,\"thirty first\":31\n};\n\n// --- MONTHS ---\nconst months = {\n  january:0, february:1, march:2, april:3, may:4, june:5, july:6, august:7,\n  september:8, october:9, november:10, december:11\n};\n\n// --- NUMBER WORDS ---\nconst numberWords = {\n  \"one\":1,\"two\":2,\"three\":3,\"four\":4,\"five\":5,\"six\":6,\"seven\":7,\"eight\":8,\"nine\":9,\"ten\":10,\n  \"eleven\":11,\"twelve\":12\n};\n\n// --- RELATIVE DAYS ---\nconst weekdays = {\n  sunday:0, monday:1, tuesday:2, wednesday:3, thursday:4, friday:5, saturday:6\n};\n\n// --- TIME PARSER ---\nfunction parseTimePhrase(text) {\n  let hour = 9, minute = 0; // default\n  const timeMatch = text.match(/(\\d{1,2})(:(\\d{2}))?\\s?(am|pm)?/i);\n  if (timeMatch) {\n    hour = parseInt(timeMatch[1]);\n    minute = parseInt(timeMatch[3] || \"0\");\n    const ampm = (timeMatch[4] || \"\").toLowerCase();\n    if (ampm === \"pm\" && hour < 12) hour += 12;\n    if (ampm === \"am\" && hour === 12) hour = 0;\n    return {hour, minute};\n  }\n\n  // word-based\n  const words = text.split(\" \");\n  if (numberWords[words[0]]) hour = numberWords[words[0]];\n  if (words.includes(\"thirty\")) minute = 30;\n  if (words.includes(\"fifteen\")) minute = 15;\n  if (words.includes(\"forty five\")) minute = 45;\n\n  if (words.includes(\"half\") && words.includes(\"past\") && numberWords[words[2]]) {\n    hour = numberWords[words[2]];\n    minute = 30;\n  }\n  if (words.includes(\"quarter\") && words.includes(\"past\") && numberWords[words[2]]) {\n    hour = numberWords[words[2]];\n    minute = 15;\n  }\n  if (words.includes(\"quarter\") && words.includes(\"to\") && numberWords[words[2]]) {\n    hour = numberWords[words[2]] - 1;\n    minute = 45;\n  }\n\n  if (words.includes(\"pm\") && hour < 12) hour += 12;\n  if (words.includes(\"am\") && hour === 12) hour = 0;\n\n  return {hour, minute};\n}\n\n// --- DATE EXTRACTION ---\nlet appointment_time = null;\nlet now = new Date();\nlet year = now.getFullYear();\nlet day, month, hour = 9, minute = 0;\n\n// Case 1: explicit \"August 26th at 11:30 am\"\nlet absDate = transcript.match(/(january|february|march|april|may|june|july|august|september|october|november|december)\\s+(\\d{1,2})(st|nd|rd|th)?\\s*(at\\s+([a-z0-9 :]+(am|pm)?))?/i);\nif (absDate) {\n  month = months[absDate[1].toLowerCase()];\n  day = parseInt(absDate[2]) || 1;\n  if (absDate[5]) {\n    const t = parseTimePhrase(absDate[5]);\n    hour = t.hour; minute = t.minute;\n  }\n}\n\n// Case 2: spelled ordinals \"twenty sixth august at eleven thirty am\"\nlet spelledDate = transcript.match(/(twenty (first|second|third|fourth|fifth|sixth|seventh|eighth|ninth)|tenth|eleventh|twelfth|thirteenth|fourteenth|fifteenth|sixteenth|seventeenth|eighteenth|nineteenth|twentieth|twenty (first|second|third|fourth|fifth|sixth|seventh|eighth|ninth)|thirtieth|thirty first)\\s+(january|february|march|april|may|june|july|august|september|october|november|december)( at ([a-z0-9 :]+(am|pm)?))?/i);\n\nif (spelledDate) {\n  const ordinalRaw = spelledDate[1];\n  const monthRaw = spelledDate[3];\n\n  if (ordinalRaw && ordinals[ordinalRaw.toLowerCase()]) {\n    day = ordinals[ordinalRaw.toLowerCase()];\n  }\n  if (monthRaw && months[monthRaw.toLowerCase()] !== undefined) {\n    month = months[monthRaw.toLowerCase()];\n  }\n\n  if (spelledDate[4]) {\n    const t = parseTimePhrase(spelledDate[4]);\n    hour = t.hour; \n    minute = t.minute;\n  }\n}\n\n\n// Case 3: relative \"tomorrow at 3 pm\"\nif (!day && transcript.includes(\"tomorrow\")) {\n  let tomorrow = new Date();\n  tomorrow.setDate(now.getDate() + 1);\n  day = tomorrow.getDate();\n  month = tomorrow.getMonth();\n  const relTime = transcript.match(/tomorrow at ([a-z0-9 :]+(am|pm)?)/i);\n  if (relTime) {\n    const t = parseTimePhrase(relTime[1]);\n    hour = t.hour; minute = t.minute;\n  }\n}\n\n// Case 4: \"next monday at 10\"\nlet weekdayMatch = transcript.match(/next (monday|tuesday|wednesday|thursday|friday|saturday|sunday)( at ([a-z0-9 :]+(am|pm)?))?/i);\nif (weekdayMatch) {\n  let targetDow = weekdays[weekdayMatch[1].toLowerCase()];\n  let temp = new Date(now);\n  do {\n    temp.setDate(temp.getDate() + 1);\n  } while (temp.getDay() !== targetDow);\n  day = temp.getDate();\n  month = temp.getMonth();\n  if (weekdayMatch[2]) {\n    const t = parseTimePhrase(weekdayMatch[2]);\n    hour = t.hour; minute = t.minute;\n  }\n}\n\n// If we got a valid date\nif (day && month !== undefined) {\n  appointment_time = new Date(year, month, day, hour, minute).toISOString();\n}\n\n// --- FINAL RETURN ---\nreturn {\n  ...$json,\n  appointment_time,\n  call_analysis: {\n    ...$json.call_analysis,\n    custom_analysis_data: {\n      ...$json.call_analysis?.custom_analysis_data,\n      Outcome: outcome\n    }\n  }\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -112,
+        624
+      ],
+      "id": "8ed1db32-2e19-4f10-8cfa-772630a267cb",
+      "name": "Transform_Call_Data"
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  let outcome = item.json?.outcome || \"Unknown\";\n\n  // --- Normalize safely ---\n  let normalized = outcome\n    .toString()\n    .trim()\n    .toLowerCase()\n    .replace(/[^a-z\\s]/g, \"\"); // remove symbols/numbers\n\n  // --- Map to canonical categories ---\n  const outcomeMap = {\n    \"rejected offer\": [\"rejected offer\", \"not interested\", \"no thanks\", \"reject\", \"stop calling\", \"declined\", \"unsubscribed\"],\n    \"booked appointment\": [\"booked appointment\", \"appointment\", \"meeting booked\", \"confirmed meeting\", \"scheduled\", \"reserved\", \"call booked\"],\n    \"interested\": [\"interested\", \"curious\", \"tell me more\", \"send info\", \"follow up\", \"maybe\", \"looking forward\"],\n    \"voicemail\": [\"voicemail\", \"voice mail\", \"left message\", \"not available\", \"call back later\"],\n    \"unknown\": [\"unknown\", \"\"]\n  };\n\n  let final = \"unknown\";\n  for (const [canonical, variants] of Object.entries(outcomeMap)) {\n    if (variants.some(v => normalized.includes(v))) {\n      final = canonical;\n      break;\n    }\n  }\n\n  // Store normalized outcome\n  item.json.normalizedOutcome = final;\n\n  return item;\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        304,
+        624
+      ],
+      "id": "8aca2797-8e22-4189-bd3b-39f632f50cfb",
+      "name": "Extract_Outcome"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "6c4ea592-b492-46f1-8c71-986e40eb5239",
+              "leftValue": "={{$json[\"body\"][\"event\"]}}",
+              "rightValue": "call_analyzed",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -2464,
+        560
+      ],
+      "id": "6aca34ef-be45-470d-aae5-739651096aa9",
+      "name": "If2"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -2288,
+        784
+      ],
+      "id": "a0c0e3e0-6ac1-4673-9efa-c325db5cf458",
+      "name": "No Operation, do nothing"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Start Timer": {
+      "main": [
+        [
+          {
+            "node": "Generate Outreach Sequence (Gemini API)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many rows": {
+      "main": [
+        [
+          {
+            "node": "Merge Call + Prospect",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Send email1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update a row1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update a row2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update a row3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send email1": {
+      "main": [
+        [
+          {
+            "node": "Create a row3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a row": {
+      "main": [
+        [
+          {
+            "node": "Parse_Retell_Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code8": {
+      "main": [
+        [
+          {
+            "node": "Retry_Retell_Call",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code9": {
+      "main": [
+        [
+          {
+            "node": "Update a row5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a row3": {
+      "main": [
+        [
+          {
+            "node": "Update a row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a row4": {
+      "main": [
+        [
+          {
+            "node": "Extract_Outcome",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update a row": {
+      "main": [
+        [
+          {
+            "node": "ComputeDailyIncrements",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update a row1": {
+      "main": [
+        [
+          {
+            "node": "ComputeDailyIncrements",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update a row2": {
+      "main": [
+        [
+          {
+            "node": "ComputeDailyIncrements",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update a row3": {
+      "main": [
+        [
+          {
+            "node": "ComputeDailyIncrements",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Update daily_metrics",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create daily_metrics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "daily_metrics": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ComputeDailyIncrements": {
+      "main": [
+        [
+          {
+            "node": "daily_metrics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many rows2": {
+      "main": [
+        []
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Update Call Log",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Save Call Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Inbound Webhook": {
+      "main": [
+        [
+          {
+            "node": "Validate Required Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Required Fields": {
+      "main": [
+        [
+          {
+            "node": "Prepare AI Prompt",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge Prospect + AI Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare AI Prompt": {
+      "main": [
+        [
+          {
+            "node": "Start Timer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Outreach Sequence (Gemini API)": {
+      "main": [
+        [
+          {
+            "node": "Merge Prospect + AI Response",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge Prospect + AI Response": {
+      "main": [
+        [
+          {
+            "node": "Format for DB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format for DB": {
+      "main": [
+        [
+          {
+            "node": "Save Outreach Data (Supabase)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge Data Before Scraper",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Outreach Data (Supabase)": {
+      "main": [
+        [
+          {
+            "node": "Send Outreach Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Outreach Email": {
+      "main": [
+        [
+          {
+            "node": "Log Email Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Email Status": {
+      "main": [
+        [
+          {
+            "node": "Save API Logs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save API Logs": {
+      "main": [
+        [
+          {
+            "node": "Merge Data Before Scraper",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge Data Before Scraper": {
+      "main": [
+        [
+          {
+            "node": "Fix Website URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fix Website URL": {
+      "main": [
+        [
+          {
+            "node": "LinkedIn Scraper",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkedIn Scraper": {
+      "main": [
+        [
+          {
+            "node": "Scraper Data Cleaning",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Scraper Data Cleaning": {
+      "main": [
+        [
+          {
+            "node": "Data Format( Retell Prompt)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Data Format( Retell Prompt)": {
+      "main": [
+        [
+          {
+            "node": "Final format (Retell Payload)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Final format (Retell Payload)": {
+      "main": [
+        [
+          {
+            "node": "Retell Call Script",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Retell Call Script": {
+      "main": [
+        [
+          {
+            "node": "Retell Call Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Retell Call Request": {
+      "main": [
+        []
+      ]
+    },
+    "Call Analysis Webhook": {
+      "main": [
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Detect Unsuccessful Call": {
+      "main": [
+        [
+          {
+            "node": "Get many rows",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge Call + Prospect",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse & Normalize Call Data": {
+      "main": [
+        [
+          {
+            "node": "Get many rows2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Call + Prospect": {
+      "main": [
+        [
+          {
+            "node": "Parse & Normalize Call Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Call Log": {
+      "main": [
+        [
+          {
+            "node": "Validate_Call_Outcome",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Call Log": {
+      "main": [
+        [
+          {
+            "node": "Validate_Call_Outcome",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load_All_Prospects": {
+      "main": [
+        [
+          {
+            "node": "Get a row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse_Retell_Webhook": {
+      "main": [
+        [
+          {
+            "node": "Check_Attempt_Count",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check_Attempt_Count": {
+      "main": [
+        [
+          {
+            "node": "Code8",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Stop_Process",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate_Call_Outcome": {
+      "main": [
+        [
+          {
+            "node": "Load_All_Prospects",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Transform_Call_Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Retry_Retell_Call": {
+      "main": [
+        [
+          {
+            "node": "Code9",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transform_Call_Data": {
+      "main": [
+        [
+          {
+            "node": "Create a row4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract_Outcome": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "Detect Unsuccessful Call",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "d9110d46-688d-4ae7-8df3-a2a1de90f188",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "aeb1742f74735168dfe2b61dbe459cc2ad2211ff548ad4d16aba29080037e9cc"
+  },
+  "id": "0AYed24Syzeqt1vn",
+  "tags": []
+}
