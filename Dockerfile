@@ -1,14 +1,16 @@
 FROM n8nio/n8n:latest
 
-# Copy your workflow into the n8n data dir
+# Copy workflow into n8n's data dir
 COPY n8n-workflow.json /home/node/.n8n/workflows/n8n-workflow.json
-COPY start.sh /docker-entrypoint-start.sh
 
-# Make the script executable
-RUN chmod +x /docker-entrypoint-start.sh
+# Copy start script into /home/node/
+COPY start.sh /home/node/start.sh
 
-# Expose the n8n port (Railway will still set $PORT)
+# Ensure script is executable
+RUN chmod +x /home/node/start.sh
+
+# Expose default n8n port
 EXPOSE 5678
 
-# Run our wrapper which imports then starts n8n
-CMD ["/docker-entrypoint-start.sh"]
+# Run our wrapper
+CMD ["/home/node/start.sh"]
