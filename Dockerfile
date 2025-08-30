@@ -1,24 +1,33 @@
-# Use the official n8n image as base
+# Use official n8n image
 FROM n8nio/n8n:latest
 
-# Switch to root to copy files and set permissions
+# Switch to root to install bash
 USER root
+
+# Install bash
+RUN apt-get update && apt-get install -y bash && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
 WORKDIR /home/node
 
-# Copy workflow and start script
+# Copy workflow
 COPY n8n-workflow.json /home/node/.n8n/workflows/n8n-workflow.json
-COPY start.sh .
 
-# Make the start script executable and set ownership
-RUN chmod +x start.sh && chown node:node start.sh
+# Create n8n directory if missing
+RUN mkdir -p /home/node/.n8n && chown -R node:node /home/node/.n8n
 
-# Switch back to node user
+# Switch to node user
 USER node
 
-# Expose default n8n port
+# Expose default port (optional)
 EXPOSE 5678
 
-# Set default command to run the start script
-CMD ["sh", "/home/node/start.sh"]
+# Use inline start script via bash -c
+CMD ["bash", "-c", "\
+  mkdir -p /home/node/.n8n && \
+  if [ ! -f '/home/node/.n8n/.imported' ] && [ -f '/home/node/.n8n/workflows/n8n-workflow.json' ]; then \
+    n8n import:workflow --input=/home/node/.n8n/workflows/n8n-workflow.json || true; \
+    touch /home/node/.n8n/.imported; \
+  fi; \
+  n8n start --host 0.0.0.0 --port $PORT \
+"]
