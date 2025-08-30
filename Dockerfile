@@ -17,4 +17,4 @@ USER node
 EXPOSE 5678
 
 # Run wrapper
-CMD ["sh", "/home/node/start.sh"]
+CMD ["bash", "/home/node/start.sh"]
